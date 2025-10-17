@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>寻色</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>寻色</h1>
+            <div class="game-area">
+                <!-- 目标颜色区域 -->
+                <div class="target-color">
+                    <h2>目标颜色</h2>
+                    <div class="color-box" id="targetColor"></div>
+                </div>
+
+                <!-- 调色盘区域 -->
+                <div class="color-palette">
+                    <h2>调色盘</h2>
+                    <div class="palette-grid" id="palette"></div>
+                </div>
+
+                <!-- 用户选择区域 -->
+                <div class="user-selection">
+                    <h2>你的选择</h2>
+                    <div class="color-box" id="userColor"></div>
+                    <button id="confirmBtn">确定选择</button>
+                </div>
+
+                <!-- 结果展示区域 -->
+                <div class="result" id="result">
+                    <p>请尝试匹配目标颜色！</p>
+                </div>
+            </div>
+        </div>
+        <script src="js/script.js"></script>
+    </body>
+</html>
