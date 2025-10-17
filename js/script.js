@@ -1,9 +1,104 @@
+class Color {
+    constructor(value) {
+        this.tc = tinycolor(value);
+        if (!this.tc.isValid()) {
+            throw new Error("Invalid color value");
+        }
+    }
+
+    getRGB() {
+        const { r, g, b } = this.tc.toRgb();
+        return [r, g, b];
+    }
+
+    getHSV() {
+        const { h, s, v } = this.tc.toHsv();
+        return [h, s * 100, v * 100];
+    }
+
+    getHex() {
+        return this.tc.toHexString();
+    }
+
+    getCssRGB() {
+        return this.tc.toRgbString();
+    }
+
+    similarityTo(otherColor) {
+        const rgb1 = this.getRGB();
+        const rgb2 = otherColor.getRGB();
+
+        const diffR = rgb1[0] - rgb2[0];
+        const diffG = rgb1[1] - rgb2[1];
+        const diffB = rgb1[2] - rgb2[2];
+
+        const distance = Math.sqrt(diffR * diffR, diffG * diffG, diffB * diffB);
+        const maxDistance = Math.sqrt(255 * 255 * 3);
+        const rawScore = 1 - distance / maxDistance;
+        return Math.round(rawScore * rawScore * 10000) / 100;
+    }
+
+    static random() {
+        return new Color({
+            r: Math.floor(Math.random() * 256),
+            g: Math.floor(Math.random() * 256),
+            b: Math.floor(Math.random() * 256)
+        })
+    }
+}
+
+class ColorPicker {
+    constructor(spectrumEl, hueSliderEl, rgbInputEl, hexInputEl, onColorChange) {
+        this.spectrumEl = spectrumEl;
+        this.hueSliderEl = hueSliderEl;
+        this.rgbInputEl = rgbInputEl;
+        this.hexInputEl = hexInputEl;
+        this.onColorChange = onColorChange;
+        this.currentHue = 0;
+        this.currentColor = Color.random();
+
+        this.initSpectrum();
+        this.initHueSlider();
+        this.initInputs();
+        this.updateUI();
+    }
+
+    initSpectrum() {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+        gradient.setAttribute("id", "spectrumGradient");
+        gradient.setAttribute("x1", "0%");
+        gradient.setAttribute("y1", "0%");
+        gradient.setAttribute("x2", "100%");
+        gradient.setAttribute("y2", "0%");
+
+        const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop1.setAttribute("offset", "0%");
+        stop1.setAttribute("stop-color", "#fff");
+
+        const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop2.setAttribute("offset", "100%");
+        stop2.setAttribute("stop-color", `hsl(${this.currentHue}, 100%, 50%)`);
+
+        gradient.appendChild(stop1);
+        gradient.appendChild(stop2);
+        defs.appendChild(gradient);
+        svg.appendChild(defs);
+
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    const targetColorE1 = document.getElementById('targetColor');
-    const paletteE1 = document.getElementById('palette');
-    const userColorE1 = document.getElementById('userColor');
+    const targetColorEl = document.getElementById('targetColor');
+    const paletteEl = document.getElementById('palette');
+    const userColorEl = document.getElementById('userColor');
     const confirmBtn = document.getElementById('confirmBtn');
-    const resultE1 = document.getElementById('result');
+    const resultEl = document.getElementById('result');
 
     let targetColor = '';
     let userSelectedColor = '';
@@ -17,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function createPalette() {
-        paletteE1.innerHTML = '';
+        paletteEl.innerHTML = '';
         for (let r = 0; r < 16; r++) {
             for (let g = 0; g < 16; g++) {
                 const b = 8;
@@ -30,10 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 cell.addEventListener('click', function () {
                     userSelectedColor = this.dataset.color;
-                    userColorE1.style.backgroundColor = userSelectedColor;
+                    userColorEl.style.backgroundColor = userSelectedColor;
                 });
 
-                paletteE1.appendChild(cell);
+                paletteEl.appendChild(cell);
             }
         }
     }
@@ -56,26 +151,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initGame() {
         targetColor = generateRandomColor();
-        targetColorE1.style.backgroundColor = targetColor;
+        targetColorEl.style.backgroundColor = targetColor;
 
         console.log('initGame targetColor:', targetColor);
 
-        userColorE1.style.backgroundColor = "#ffffff";
+        userColorEl.style.backgroundColor = "#ffffff";
         userSelectedColor = '';
 
-        resultE1.innerHTML = '<p>请尝试匹配目标颜色</p>';
+        resultEl.innerHTML = '<p>请尝试匹配目标颜色</p>';
         createPalette();
     }
 
     confirmBtn.addEventListener('click', function () {
         if (!userSelectedColor) {
-            resultE1.innerHTML = '<p style="color:red">请先选择一个颜色</p>';
+            resultEl.innerHTML = '<p style="color:red">请先选择一个颜色</p>';
             return;
         }
 
         const similarity = calculateSimilarity(targetColor, userSelectedColor);
         let message = `<p>相似度：${similarity}</p>`
-        resultE1.innerHTML = message + '<button id="restartBtn">再试一次</button>';
+        resultEl.innerHTML = message + '<button id="restartBtn">再试一次</button>';
 
         // 给动态插入的重试按钮添加事件
         const restartBtn = document.getElementById('restartBtn');

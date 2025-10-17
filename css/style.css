@@ -100,3 +100,54 @@ button:hover {
 .result button {
     margin: 10px auto;
 }
+
+.hsv-palette {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.hsv-spectrum {
+    width: 200px;
+    height: 200px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    cursor: crosshair;
+    position: relative;
+    background: linear-gradient(to right, #fff, #000);
+}
+
+.hsv-hue-slider {
+    width: 30px;
+    height: 200px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    background: linear-gradient(to bottom,
+        #f00 0%, #ff0 17%, #0f0 33%,
+        #0ff 50%, #00f 67%, #f0f 83%, #f00 100%
+    );
+}
+
+.color-inputs {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.input-group {
+    flex: 1;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

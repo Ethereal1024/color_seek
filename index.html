@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
         <title>寻色</title>
         <link rel="stylesheet" href="css/style.css">
     </head>
@@ -19,7 +20,20 @@
                 <!-- 调色盘区域 -->
                 <div class="color-palette">
                     <h2>调色盘</h2>
-                    <div class="palette-grid" id="palette"></div>
+                    <div class="hsv-palette">
+                        <div class="hsv-spectrum" id="hsvSpectrum"></div>
+                        <div class="hsv-hue-slider" id="hsvHuwSlider"></div>
+                    </div>
+                    <div class="color-inputs">
+                        <div class="input-group">
+                            <label>RGB:</label>
+                            <input type="text" id="rgbInput" placeholder="R,G,B">
+                        </div>
+                        <div class="input-group">
+                            <label>HEX:</label>
+                            <input type="text" id="hexInput" placeholder="#RRGGBB">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 用户选择区域 -->
