@@ -326,26 +326,83 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
-        // 在右下角添加重新开始按钮
-        const restartBtn = document.createElement('button');
-        restartBtn.id = 'restartBtn';
-        restartBtn.textContent = '重新开始';
-        restartBtn.className = 'restart-button';
-        restartBtn.style.position = 'absolute';
-        restartBtn.style.right = '12px';
-        restartBtn.style.bottom = '12px';
-        restartBtn.style.zIndex = '20';
+    // 在右下角添加重新开始按钮（右对齐）
+    const restartBtn = document.createElement('button');
+    restartBtn.id = 'restartBtn';
+    restartBtn.textContent = '重新开始';
+    restartBtn.className = 'restart-button';
+    restartBtn.style.position = 'fixed';
+    restartBtn.style.right = '20px';
+    restartBtn.style.bottom = '20px';
+    restartBtn.style.zIndex = '1001';
+    
+    restartBtn.addEventListener('click', function() {
+        // 添加重新开始按钮的淡出动画
+        restartBtn.classList.add('fade-out');
         
-        restartBtn.addEventListener('click', function() {
+        // 添加左侧色块的滑出动画
+        const targetBlock = document.querySelector('.target-block');
+        if (targetBlock) {
+            targetBlock.classList.add('restart-slide-out');
+        }
+        
+        // 添加右侧色块的滑出动画
+        const userBlock = document.querySelector('.user-block');
+        if (userBlock) {
+            userBlock.classList.add('restart-slide-out');
+        }
+        
+        // 添加中间调色盘的缩放淡出动画
+        const paletteBlock = document.querySelector('.palette-block');
+        if (paletteBlock) {
+            paletteBlock.classList.add('restart-scale-out');
+        }
+        
+        // 延迟执行重置操作，让动画完成
+        setTimeout(() => {
             // 移除重新开始按钮
             restartBtn.remove();
             // 复原布局
             gameArea.classList.remove('compressed');
             // 重新显示确定选择按钮
             confirmBtn.style.display = 'block';
-            // 重置游戏
+            
+            // 重置游戏内容
             initGame();
-        });
+            
+            // 获取重置后的元素
+            const newTargetBlock = document.querySelector('.target-block');
+            const newUserBlock = document.querySelector('.user-block');
+            const newPaletteBlock = document.querySelector('.palette-block');
+            
+            // 确保所有动画类被移除，然后添加入场动画
+            if (newTargetBlock) {
+                newTargetBlock.classList.remove('restart-slide-out', 'restart-slide-in');
+                // 强制重排以确保动画生效
+                void newTargetBlock.offsetWidth;
+                newTargetBlock.classList.add('restart-slide-in');
+                setTimeout(() => {
+                    newTargetBlock.classList.remove('restart-slide-in');
+                }, 600);
+            }
+            if (newUserBlock) {
+                newUserBlock.classList.remove('restart-slide-out', 'restart-slide-in');
+                void newUserBlock.offsetWidth;
+                newUserBlock.classList.add('restart-slide-in');
+                setTimeout(() => {
+                    newUserBlock.classList.remove('restart-slide-in');
+                }, 600);
+            }
+            if (newPaletteBlock) {
+                newPaletteBlock.classList.remove('restart-scale-out', 'restart-scale-in');
+                void newPaletteBlock.offsetWidth;
+                newPaletteBlock.classList.add('restart-scale-in');
+                setTimeout(() => {
+                    newPaletteBlock.classList.remove('restart-scale-in');
+                }, 500);
+            }
+        }, 600);
+    });
         
         document.body.appendChild(restartBtn);
     }

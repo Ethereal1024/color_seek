@@ -481,15 +481,64 @@ button:hover {
     position: fixed;
     right: 20px;
     top: 20px;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: #fff;
-    border: 1px solid #ddd;
-    box-shadow: 0 6px 18px rgba(16,24,40,0.12);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    border: none;
+    box-shadow: 0 8px 24px rgba(107,70,193,0.25);
     cursor: pointer;
-    font-size: 20px;
-    z-index: 1002; /* 置顶齿轮按钮 */
+    font-size: 22px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.settings-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.settings-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(107,70,193,0.35);
+}
+
+.settings-button:hover::before {
+    opacity: 1;
+}
+
+.settings-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 4px 16px rgba(107,70,193,0.25);
+}
+
+/* 设置按钮的动画效果 */
+.settings-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(107,70,193,0.35);
+}
+
+/* 设置按钮的脉冲效果 */
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 8px 24px rgba(107,70,193,0.25); }
+    50% { box-shadow: 0 8px 24px rgba(107,70,193,0.4), 0 0 20px rgba(107,70,193,0.3); }
+}
+
+.settings-button {
+    animation: pulseGlow 3s ease-in-out infinite;
 }
 
 .settings-panel {
@@ -692,6 +741,66 @@ button, .settings-button, .close-settings, .hue-handle, .palette-cell {
 .restart-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(107,70,193,0.2);
+}
+
+/* 重新开始动画效果 */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.restart-animation-out {
+    animation: fadeOut 400ms ease-out forwards;
+}
+
+.restart-animation-in {
+    animation: fadeIn 400ms ease-out forwards;
+}
+
+.restart-slide-out {
+    animation: slideOut 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.restart-slide-in {
+    animation: slideIn 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.restart-scale-out {
+    animation: scaleOut 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.restart-scale-in {
+    animation: scaleIn 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 重新开始按钮的退出动画 */
+.restart-button.fade-out {
+    animation: fadeOut 300ms ease-out forwards;
 }
 
 /* 强制覆盖：确保 html/body、容器、三栏以及每个色块垂直铺满屏幕，消除残留白缝 */
