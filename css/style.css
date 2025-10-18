@@ -1,48 +1,420 @@
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0; /* 改为 0，容器内处理内边距以避免页面滚动 */
     background-color: #f5f5f5;
     line-height: 1.6;
 }
 
+/* 全局 box-sizing，便于控件大小计算 */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden; /* 禁止页面纵向滚动，内部容器负责布局 */
+}
+
 .container {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 100%;
+    margin: 0;
+    background: transparent; /* 去掉卡片背景，使内容直接铺到背景上 */
+    padding: 0; /* 移除上方空白，使三块直接贴边 */
+    border-radius: 0;
+    box-shadow: none;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 主题色与变量 */
+:root {
+    --accent: #8736dd;
+    --accent-strong: #8736dd;
+    --muted: #6b7280;
+    --card-bg: #ffffff;
+}
+
+.page-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 12px;
 }
 
 h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+    text-align: left;
+    color: var(--accent-strong);
+    margin: 0;
+    font-size: 48px; /* 增大标题 */
+    letter-spacing: 1px;
+    text-transform: none;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 4px;
 }
 
 .game-area {
+    display: flex;
+    gap: 0; /* 三块紧贴，无间隙 */
+    flex: 1 1 auto; /* 让 game-area 占据剩余高度 */
+    min-height: 0; /* 允许子项使用 min-height:0 来正确收缩 */
+    transition: all 360ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative; /* 为绝对定位的子元素提供参考 */
+    overflow: hidden; /* 防止变换过程中的溢出 */
+}
+
+.game-area.horizontal {
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.left-column {
+    flex: 1 1 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.right-column {
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+/* 确保右侧在高度受限时可内部滚动，避免撑开整个容器 */
+.right-column {
+    overflow: auto;
+}
+}
+
+/* 三栏精确布局：左/中/右 */
+.game-area.horizontal {
+    align-items: stretch;
+}
+
+.game-area.horizontal .column {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+.left-column {
+    flex: 0 0 240px; /* 目标颜色固定宽 */
+    display: flex;
+    flex-direction: column;
+}
+
+.middle-column {
+    flex: 1 1 auto; /* 调色盘占剩余 */
+    min-width: 420px; /* 保持调色盘最小宽度 */
+    display: flex;
+    flex-direction: column;
+}
+
+.right-column {
+    flex: 0 0 240px; /* 用户区域固定宽 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 压缩态：隐藏中间调色盘，左右两侧扩展并并列占据屏幕中心 */
+.game-area.compressed .middle-column {
+    width: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.98);
+    transition: all 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.game-area.compressed .left-column {
+    flex: 0 0 33.333333% !important;
+    width: 33.333333% !important;
+    min-width: 0 !important;
+    max-width: 33.333333% !important;
+    opacity: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto;
+    will-change: transform, width;
+    transform-origin: right center;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.game-area.compressed .right-column {
+    flex: 0 0 66.666667% !important;
+    width: 66.666667% !important;
+    min-width: 0 !important;
+    max-width: 66.666667% !important;
+    opacity: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto;
+    will-change: transform, width;
+    transform-origin: left center;
+    transition: all 520ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 丝滑效果：左右色块在并拢时做微小的平移与放大 */
+.game-area.compressed .left-column .target-block .block-value,
+.game-area.compressed .left-column .target-block,
+.game-area.compressed .right-column .user-block .block-value,
+.game-area.compressed .right-column .user-block {
+    transform-origin: center;
+    transition: transform 420ms cubic-bezier(.2,.9,.2,1);
+}
+
+.game-area.compressed .left-column .target-block {
+    transform-origin: right center;
+    transform: scale(1.02);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.game-area.compressed .right-column .user-block {
+    transform-origin: left center;
+    transform: scale(1.02);
+    transition: all 520ms cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* 覆盖全局 .color-box，对于同时带有 target-block/user-block 的元素使用更具体的选择器 */
+.color-box.target-block, .color-box.user-block {
+    margin: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100%;
+}
+
+/* 隐藏卡片内的标签和小控件，在压缩时只保留 color 面 */
+.game-area.compressed .block-label,
+.game-area.compressed .result-block .block-value p {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 260ms ease, transform 260ms ease;
+}
+
+/* 相似度覆盖面板 */
+.similarity-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.0);
+    z-index: 2000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 320ms ease, background 320ms ease;
+}
+
+.similarity-overlay.show {
+    pointer-events: auto;
+    opacity: 1;
+    background: rgba(0,0,0,0.4);
+}
+
+.similarity-panel {
+    background: rgba(255,255,255,0.98);
+    padding: 30px 36px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: 0 24px 60px rgba(16,24,40,0.45);
+    transform: translateY(8px);
+    transition: transform 260ms ease, opacity 260ms ease;
+}
+
+.similarity-overlay.show .similarity-panel {
+    transform: translateY(0);
+}
+
+.similarity-text {
+    font-size: 36px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 18px;
+}
+
+.similarity-panel .ghost {
+    background: transparent;
+    color: var(--accent-strong);
+    border: 1px solid rgba(107,70,193,0.16);
+    padding: 10px 18px;
+    border-radius: 6px;
+}
+
 .target-color,
 .user-selection,
 .color-palette {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    background-color: #fff;
+    border: none;
+    padding: 0;
+    border-radius: 12px;
+    background-color: transparent;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 4px !important;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(16,24,40,0.06);
+}
+
+.target-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.target-title {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 600;
+    min-width: 120px;
+}
+
+
+.target-block, .user-block, .result-block, .palette-block {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    border-radius: 4px !important;
+    flex: 1 1 auto; /* 让色块在列中伸展 */
+    min-height: 0; /* 允许正确收缩，避免子元素溢出 */
+    height: auto;
+}
+
+/* 让左右两侧的纯色块铺满，添加内边距让标题有空间显示 */
+.target-block, .user-block {
+    padding: 16px; /* 添加内边距让标题有空间显示 */
+    border: none;
+    box-shadow: none;
+    border-radius: 0; /* 紧贴屏幕边缘 */
+    position: relative; /* 便于内部标签绝对定位 */
+}
+
+/* 确保中间调色盘也有相对定位，便于标题绝对定位 */
+.palette-block {
+    position: relative;
+    padding: 16px;
+    border-radius: 4px !important;
+}
+
+/* 去除左右色块的外边距和最小高度，确保铺满顶部到底部 */
+.target-block, .user-block {
+    margin: 0;
+    min-height: 0;
+    height: 100%;
+}
+
+/* 覆盖左右色块内的 .color-box 间距与尺寸，防止顶部/底部白缝 */
+.target-block .color-box, .user-block .color-box {
+    margin: 0;
+    min-height: 0;
+    height: 100%;
+    border: none;
+}
+
+.block-label {
+    font-size: 24px;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* 所有标题使用统一的绝对定位，确保在同一水平线上 */
+.target-block .block-label,
+.user-block .block-label,
+.palette-block .block-label {
+    position: absolute;
+    top: 16px; /* 统一的上边距 */
+    left: 16px; /* 统一的左边距 */
+    z-index: 2;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    width: auto;
+    text-align: left;
+    pointer-events: none; /* 防止标题干扰点击事件 */
+}
+
+.target-block .block-value,
+.user-block .block-value {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* 左对齐标签并占满宽度，便于在色块内部从左侧开始显示 */
+.block-label {
+    align-self: flex-start;
+    width: 100%;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.block-value {
+    width: 100%;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* 调色板下方的确认按钮样式 */
+.palette-block button#confirmBtn {
+    width: 100%;
+    margin-top: 15px;
+    box-shadow: 0 12px 30px rgba(107,70,193,0.22);
+    transform: translateY(0);
+}
+
+.palette-block button#confirmBtn:hover {
+    transform: translateY(-4px);
 }
 
 .color-box {
     width: 100%;
-    height: 100px;
-    border-radius: 5px;
+    height: auto;
+    min-height: 120px;
+    border-radius: 4px !important;
     margin: 10px 0;
-    border: 1px solid #ccc;
-    transition: all 0.3s ease;
+    border: 2px solid rgba(0,0,0,0.06);
+    transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.color-box:active {
+    transform: scale(0.995);
 }
 
 .palette-grid {
@@ -67,22 +439,24 @@ h1 {
 }
 
 button {
-    background-color: #9932cc;
+    background: linear-gradient(90deg, var(--accent), var(--accent-strong));
     color: white;
     border: none;
-    padding: 10px, 20px;
+    padding: 12px 20px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
-    margin: 10px, 0;
+    font-size: 18px;
+    margin: 12px 0;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    border-radius: 4px !important;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    box-shadow: 0 8px 20px rgba(107,70,193,0.18);
 }
 
 button:hover {
-    background-color: #8a2be2;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(107,70,193,0.2);
 }
 
 .result {
@@ -101,15 +475,103 @@ button:hover {
     margin: 10px auto;
 }
 
+/* 设置面板样式（隐藏菜单） */
+
+.settings-button {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.12);
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1002; /* 置顶齿轮按钮 */
+}
+
+.settings-panel {
+    position: fixed;
+    right: 20px;
+    top: 80px; /* 从右上方向下弹出 */
+    width: 260px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    display: none;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 200ms ease, transform 200ms ease;
+    z-index: 1001; /* 确保面板在遮罩之上 */
+}
+
+.settings-panel.open {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 半透明遮罩，当面板打开时用于捕获面板外点击 */
+.settings-backdrop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.0);
+    z-index: 999;
+    pointer-events: auto; /* 捕获面板外点击 */
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.settings-note {
+    font-size: 12px;
+    color: #666;
+}
+
+.close-settings {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* 防止按钮等非输入元素出现文本输入光标 */
+button, .settings-button, .close-settings, .hue-handle, .palette-cell {
+    user-select: none;
+    -webkit-user-select: none;
+    caret-color: transparent;
+}
+
+/* 更严格禁止光标与聚焦样式，防止非输入元素出现插入点 */
+.hsv-spectrum, .palette-cell, .hue-handle, .color-box, .target-display, .settings-button {
+    caret-color: transparent;
+    outline: none !important;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 .hsv-palette {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
+    flex: 1 1 auto; /* 让调色盘可伸缩，避免整体高度溢出 */
+    min-height: 0;
+    margin-top: 40px; /* 为标题留出空间，避免重叠 */
 }
 
 .hsv-spectrum {
-    width: 200px;
-    height: 200px;
+    flex: 1 1 auto;
+    min-height: 220px;
     border-radius: 5px;
     border: 1px solid #ddd;
     cursor: crosshair;
@@ -118,8 +580,8 @@ button:hover {
 }
 
 .hsv-hue-slider {
-    width: 30px;
-    height: 200px;
+    width: 48px;
+    height: auto;
     border-radius: 5px;
     border: 1px solid #ddd;
     cursor: pointer;
@@ -127,27 +589,136 @@ button:hover {
         #f00 0%, #ff0 17%, #0f0 33%,
         #0ff 50%, #00f 67%, #f0f 83%, #f00 100%
     );
+    position: relative;
 }
 
-.color-inputs {
+.hue-handle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 6px;
+    margin-top: -3px;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    pointer-events: none; /* 拖动由父元素处理 */
+}
+
+.right-column .user-selection {
+    padding: 18px;
+}
+
+.right-column .result {
+    padding: 18px;
+
+/* 让结果区域在空间不足时收缩并内部滚动，而不是撑大外部容器 */
+.right-column .result {
+    flex: 1 1 auto;
+    max-height: calc(100% - 100px);
+    overflow: auto;
+}
+}
+
+@media (max-width: 600px) {
+    .hsv-palette {
+        flex-direction: column;
+    }
+
+    .hsv-spectrum {
+        width: 100%;
+        height: 150px;
+    }
+
+    .hsv-hue-slider {
+        width: 100%;
+        height: 30px;
+        background: linear-gradient(to right,
+            #f00 0%, #ff0 17%, #0f0 33%, 
+            #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+    }
+}
+
+.color-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 0 3px rgba(0,0,0,0.6);
+}
+
+/* 相似度显示样式 */
+.similarity-display {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
 }
 
-.input-group {
-    flex: 1;
+.similarity-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.8;
 }
 
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
+.similarity-percentage {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
 }
 
-.input-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+/* 重新开始按钮样式 */
+.restart-button {
+    background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 4px !important;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    box-shadow: 0 8px 20px rgba(107,70,193,0.18);
+}
+
+.restart-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(107,70,193,0.2);
+}
+
+/* 强制覆盖：确保 html/body、容器、三栏以及每个色块垂直铺满屏幕，消除残留白缝 */
+html, body, .container, .game-area, .game-area.horizontal, .game-area .column {
+    height: 100%;
+    min-height: 0;
+}
+
+.game-area .column .color-box {
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 保持中间 palette 内部控件布局，但让其色块也满高以便正确收缩 */
+.middle-column .palette-block {
+    padding: 16px;
+    box-sizing: border-box;
+    height: 100% !important;
+}
+
+/* 确保浮动按钮不影响高度布局（叠加在色块上） */
+.user-block #confirmBtn {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
 }

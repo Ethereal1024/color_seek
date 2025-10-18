@@ -3,52 +3,60 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
         <title>寻色</title>
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
         <div class="container">
-            <h1>寻色</h1>
-            <div class="game-area">
-                <!-- 目标颜色区域 -->
-                <div class="target-color">
-                    <h2>目标颜色</h2>
-                    <div class="color-box" id="targetColor"></div>
-                </div>
+            <!-- 标题已移除，三栏占满整个屏幕 -->
 
-                <!-- 调色盘区域 -->
-                <div class="color-palette">
-                    <h2>调色盘</h2>
-                    <div class="hsv-palette">
-                        <div class="hsv-spectrum" id="hsvSpectrum"></div>
-                        <div class="hsv-hue-slider" id="hsvHuwSlider"></div>
-                    </div>
-                    <div class="color-inputs">
-                        <div class="input-group">
-                            <label>RGB:</label>
-                            <input type="text" id="rgbInput" placeholder="R,G,B">
-                        </div>
-                        <div class="input-group">
-                            <label>HEX:</label>
-                            <input type="text" id="hexInput" placeholder="#RRGGBB">
-                        </div>
+            <!-- 目标颜色：简化为单个色块，文字放在色块内部 -->
+            <div class="game-area horizontal" id="gameArea">
+                <div class="column left-column" id="leftColumn">
+                    <div id="targetColor" class="color-box card target-block">
+                        <div class="block-label">目标颜色</div>
+                        <div class="block-value" id="targetValue"></div>
                     </div>
                 </div>
 
-                <!-- 用户选择区域 -->
-                <div class="user-selection">
-                    <h2>你的选择</h2>
-                    <div class="color-box" id="userColor"></div>
-                    <button id="confirmBtn">确定选择</button>
+                <div class="column middle-column" id="middleColumn">
+                    <!-- 调色盘：居中大块 -->
+                    <div class="color-box card palette-block" id="paletteBlock">
+                        <div class="block-label">调色盘</div>
+                        <div class="hsv-palette">
+                            <div class="hsv-spectrum" id="hsvSpectrum"></div>
+                            <div class="hsv-hue-slider" id="hsvHueSlider"></div>
+                        </div>
+                        <button id="confirmBtn">确定选择</button>
+                    </div>
                 </div>
 
-                <!-- 结果展示区域 -->
-                <div class="result" id="result">
-                    <p>请尝试匹配目标颜色！</p>
+                <div class="column right-column" id="rightColumn">
+                    <!-- 用户选择：色块内显示文字 -->
+                    <div class="color-box card user-block" id="userColor">
+                        <div class="block-label">选定颜色</div>
+                        <div class="block-value"></div>
+                    </div>
                 </div>
             </div>
+
         </div>
+        <!-- 隐藏设置菜单（齿轮） -->
+        <button id="settingsBtn" class="settings-button" title="设置">⚙</button>
+        <div id="settingsPanel" class="settings-panel" aria-hidden="true">
+            <div class="settings-header">
+                <span>高级设置</span>
+                <button id="closeSettings" class="close-settings"
+                    aria-label="关闭">✕</button>
+            </div>
+            <label for="kRange">相似度幂 (k): <span id="kValue">1.50</span></label>
+            <input type="range" id="kRange" min="0.5" max="3" step="0.1"
+                value="1.5">
+            <p class="settings-note">改变 k 会调整分数敏感度，数值越大对差异越敏感。</p>
+        </div>
+
         <script src="js/script.js"></script>
     </body>
 </html>
